@@ -1,0 +1,137 @@
+from flask import Flask
+from flask_restful import Resource, Api, reqparse
+import pandas as pd
+import ast
+import json
+import requests
+from dateutil import parser
+
+app = Flask(__name__)
+api = Api(app)
+
+'''
+Start: Twitter functions
+'''
+# authentication
+f = open('api_keys.json')
+data = json.load(f)
+bearer = data["bearer"]
+
+# request parameters
+count = 200
+parameters = {'count': count}
+
+# year
+relevant_year = 2021
+
+# relevant data
+relevant_data_keys = ['created_at', 'id', 'text', 'in_reply_to_screen_name']
+
+# twitter end point
+url = "https://api.twitter.com/1.1/favorites/list.json?"
+
+# set up headers
+headers = {}
+headers["Accept"] = "application/json"
+headers["Authorization"] = "Bearer {}".format(bearer)
+
+# liked tweets list
+liked_tweets = list()
+
+# get liked tweets
+def get_dict_of_tweets(parameters):
+  resp = requests.get(url, headers=headers, params=parameters)
+  tweet_dict_raw = resp.json()
+  return tweet_dict_raw
+
+# function to reduce twitters original response to relevant data
+def get_relevant_info(response_dict):
+  reduced_dict = {rel_key: response_dict[rel_key] for rel_key in relevant_data_keys}
+  reduced_dict['created_at'] = parser.parse(reduced_dict['created_at'])
+  reduced_dict['user'] = response_dict['user']['screen_name']
+  reduced_dict['tweet_url'] = 'twitter.com/{}/status/{}'.format(reduced_dict['user'], reduced_dict['id'])
+  return reduced_dict
+
+# function to turn reduced dict into dataframe and remove older likes
+def tweets_to_df(liked_tweets):
+  # move dict into dataframe
+  df = pd.DataFrame.from_dict(liked_tweets)
+
+  # only keep tweets from year in question
+  df_years = df['created_at'].apply(lambda x: x.year)
+  df = df[df_years == relevant_year]
+  return df
+
+# function to calculate and print stats
+def calc_and_print_stats(df, screen_name):
+  # number of likes
+  num_of_tweets = len(df)
+  date_of_first_tweet = df['created_at'].iloc[-1].strftime("%d %B %Y")
+
+  # number of liked accounts
+  num_of_different_accounts = len(df['user'].unique())
+
+  # number of liked replys
+  num_of_liked_replys = len(df.loc[df['in_reply_to_screen_name'] == screen_name])
+  per_liked_replys = num_of_liked_replys / num_of_tweets * 100
+
+  # top 10 accounts
+  top_ten = df['user'].value_counts().head(10)
+  stats = {'user': parameters['screen_name'],
+           'num_of_likes': num_of_tweets,
+           'num_of_different_accounts': num_of_different_accounts,
+           'num_of_liked_replys': num_of_liked_replys,
+           'per_liked_replys': per_liked_replys,
+           'top_ten': top_ten.to_dict()}
+  return stats
+
+def get_like_stats(screen_name):
+  # setup
+  parameters.pop("max_id", None)
+  parameters['screen_name'] = screen_name
+  liked_tweets = list()
+  iteration_count = 0
+  in_relevant_year = True
+
+  # loop while still in relevant year
+  while in_relevant_year:
+
+    # get tweets and reduce to relevant tweets
+    tweet_dict_raw = get_dict_of_tweets(parameters)
+    batch_of_liked_tweets = [get_relevant_info(tweet) for tweet in tweet_dict_raw]
+
+    # edge case number of likes divisible by 200
+    if len(batch_of_liked_tweets) <= 1 and iteration_count > 0:
+      print('End of likes after {} requests'.format(iteration_count))
+      break
+
+    # append to list of liked tweets
+    liked_tweets.extend(batch_of_liked_tweets)
+
+    # check if still in relevant year
+    year_of_last_tweet = liked_tweets[-1]['created_at'].year
+    in_relevant_year = year_of_last_tweet >= relevant_year
+
+    # update parameters
+    parameters['max_id'] = batch_of_liked_tweets[-1]['id']
+    iteration_count += 1
+
+  df = tweets_to_df(liked_tweets)
+  return calc_and_print_stats(df, screen_name)
+'''
+End: Twitter functions
+'''
+
+class Users(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('screen_name', required=True)  # add arguments
+        args = parser.parse_args()
+        print(args['screen_name'])
+        data = get_like_stats(args['screen_name'])
+        return {'data': data}, 200  # return data and 200 OK code
+
+api.add_resource(Users, '/users')  # '/users' is our entry point
+
+if __name__ == '__main__':
+    app.run()  # run our Flask app
