@@ -95,18 +95,18 @@ def get_like_stats(screen_name):
   iteration_count = 0
   in_relevant_year = True
 
-  # account has likes
-  account_has_likes = True
-
   # loop while still in relevant year
   while in_relevant_year:
 
     # get tweets
     tweet_dict_raw = get_dict_of_tweets(parameters)
 
+    # check for errors
+    if 'errors' in tweet_dict_raw:
+        return None, 403
+
     # check if account has likes
     if iteration_count == 0 and len(tweet_dict_raw) == 0:
-        account_has_likes = False
         return None, 404
 
     batch_of_liked_tweets = [get_relevant_info(tweet) for tweet in tweet_dict_raw]
