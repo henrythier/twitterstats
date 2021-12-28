@@ -136,6 +136,10 @@ def get_like_stats(screen_name):
 End: Twitter functions
 '''
 
+@app.route("/")
+def home():
+  return render_template("home.html")
+
 @app.route("/<name>")
 def user(name):
     print(name)
