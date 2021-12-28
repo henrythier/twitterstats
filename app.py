@@ -124,7 +124,7 @@ def get_like_stats(screen_name):
     in_relevant_year = year_of_last_tweet >= relevant_year
 
     # update parameters
-    parameters['max_id'] = batch_of_liked_tweets[-1]['id']
+    parameters['max_id'] = batch_of_liked_tweets[-1]['id'] - 1
     iteration_count += 1
 
   df = tweets_to_df(liked_tweets)
