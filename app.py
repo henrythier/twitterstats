@@ -111,7 +111,7 @@ def get_like_stats(screen_name):
 
     batch_of_liked_tweets = [get_relevant_info(tweet) for tweet in tweet_dict_raw]
 
-    # edge case number of likes divisible by 200
+    # maximum number of likes retrieved for user
     if len(batch_of_liked_tweets) <= 1 and iteration_count > 0:
       print(f'End of likes after {iteration_count} requests')
       break
