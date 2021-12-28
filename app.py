@@ -13,9 +13,9 @@ api = Api(app)
 Start: Twitter functions
 '''
 # authentication
-f = open('api_keys.json')
-data = json.load(f)
-bearer = data["bearer"]
+with open('api_keys.json') as f:
+  data = json.load(f)
+  bearer = data["bearer"]
 
 # request parameters
 count = 200
@@ -31,9 +31,7 @@ relevant_data_keys = ['created_at', 'id', 'text', 'in_reply_to_screen_name']
 url = "https://api.twitter.com/1.1/favorites/list.json?"
 
 # set up headers
-headers = {}
-headers["Accept"] = "application/json"
-headers["Authorization"] = "Bearer {}".format(bearer)
+headers = {"Accept": "application/json", "Authorization": f"Bearer {bearer}"}
 
 # liked tweets list
 liked_tweets = list()
@@ -49,7 +47,7 @@ def get_relevant_info(response_dict):
   reduced_dict = {rel_key: response_dict[rel_key] for rel_key in relevant_data_keys}
   reduced_dict['created_at'] = parser.parse(reduced_dict['created_at'])
   reduced_dict['user'] = response_dict['user']['screen_name']
-  reduced_dict['tweet_url'] = 'twitter.com/{}/status/{}'.format(reduced_dict['user'], reduced_dict['id'])
+  reduced_dict['tweet_url'] = f"twitter.com/{reduced_dict['user']}/status/{reduced_dict['id']}"
   return reduced_dict
 
 # function to turn reduced dict into dataframe and remove older likes
@@ -102,7 +100,7 @@ def get_like_stats(screen_name):
 
     # edge case number of likes divisible by 200
     if len(batch_of_liked_tweets) <= 1 and iteration_count > 0:
-      print('End of likes after {} requests'.format(iteration_count))
+      print(f'End of likes after {iteration_count} requests')
       break
 
     # append to list of liked tweets
