@@ -84,7 +84,9 @@ def calc_and_print_stats(df, screen_name):
            'num_of_different_accounts': num_of_different_accounts,
            'num_of_liked_replys': num_of_liked_replys,
            'per_liked_replys': per_liked_replys,
-           'top_ten': top_ten.to_dict()}
+           'top_ten': top_ten.to_dict(),
+           'first_like': df['created_at'].iloc[-1],
+           'last_like': df['created_at'].iloc[0]}
   return stats
 
 def get_like_stats(screen_name):
