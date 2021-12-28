@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import render_template, redirect, url_for
 from flask_restful import Resource, Api, reqparse
 import pandas as pd
 import ast
@@ -6,7 +7,10 @@ import json
 import requests
 from dateutil import parser
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='',
+            static_folder='static',
+            template_folder='template')
+app.config["DEBUG"] = True
 api = Api(app)
 
 '''
@@ -122,16 +126,11 @@ def get_like_stats(screen_name):
 End: Twitter functions
 '''
 
-class Users(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('screen_name', required=True)  # add arguments
-        args = parser.parse_args()
-        print(args['screen_name'])
-        data = get_like_stats(args['screen_name'])
-        return {'data': data}, 200  # return data and 200 OK code
-
-api.add_resource(Users, '/users')  # '/users' is our entry point
+@app.route("/<name>")
+def user(name):
+    print(name)
+    data = get_like_stats(name)
+    return {'data': data}, 200
 
 if __name__ == '__main__':
     app.run()  # run our Flask app
