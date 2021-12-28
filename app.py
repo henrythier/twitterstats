@@ -95,11 +95,20 @@ def get_like_stats(screen_name):
   iteration_count = 0
   in_relevant_year = True
 
+  # account has likes
+  account_has_likes = True
+
   # loop while still in relevant year
   while in_relevant_year:
 
-    # get tweets and reduce to relevant tweets
+    # get tweets
     tweet_dict_raw = get_dict_of_tweets(parameters)
+
+    # check if account has likes
+    if iteration_count == 0 and len(tweet_dict_raw) == 0:
+        account_has_likes = False
+        return None, 404
+
     batch_of_liked_tweets = [get_relevant_info(tweet) for tweet in tweet_dict_raw]
 
     # edge case number of likes divisible by 200
@@ -119,7 +128,8 @@ def get_like_stats(screen_name):
     iteration_count += 1
 
   df = tweets_to_df(liked_tweets)
-  return calc_and_print_stats(df, screen_name)
+  response = calc_and_print_stats(df, screen_name)
+  return response, 200
 '''
 End: Twitter functions
 '''
@@ -127,8 +137,8 @@ End: Twitter functions
 @app.route("/<name>")
 def user(name):
     print(name)
-    data = get_like_stats(name)
-    return {'data': data}, 200
+    data, status = get_like_stats(name)
+    return {'status': status, 'data': data}, 200
 
 if __name__ == '__main__':
     app.run()  # run our Flask app
