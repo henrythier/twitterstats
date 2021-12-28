@@ -141,9 +141,8 @@ def home():
 
 @app.route("/<name>")
 def user(name):
-    print(name)
     data, status = get_like_stats(name)
-    return {'status': status, 'data': data}, 200
+    return render_template('user.html', data=data)
 
 if __name__ == '__main__':
     app.run()  # run our Flask app
