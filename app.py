@@ -26,7 +26,7 @@ relevant_year = 2021
 def get_user(username):
     user_fields = "user.fields=profile_image_url"
     headers = {"Authorization": f"Bearer {bearer_token}"}
-    url = f'https://api.twitter.com/2/users/by?{username}&{user_fields}'
+    url = f'https://api.twitter.com/2/users/by?usernames={username}&{user_fields}'
     r = requests.get(url, headers=headers)
     if r.status_code != 200:
         raise Exception(f'Request returned an error: {r.status_code} {r.text}')
@@ -64,10 +64,9 @@ def tweets_to_df(liked_tweets):
 
 
 def calc_and_print_stats(df, screen_name):
-    ''' function to calculate and print stats '''
+    ''' function to calculate stats '''
     # number of likes
     num_of_tweets = len(df)
-    # date_of_first_tweet = df['created_at'].iloc[-1].strftime("%d %B %Y")
 
     # number of liked accounts
     num_of_different_accounts = len(df['user'].unique())
