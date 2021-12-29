@@ -5,20 +5,18 @@ import ast
 import json
 import requests
 from dateutil import parser
+import os
 
 app = Flask(__name__, static_url_path='',
             static_folder='static',
             template_folder='template')
-app.config["DEBUG"] = True
 api = Api(app)
 
 '''
 Start: Twitter functions
 '''
 # authentication
-with open('api_keys.json') as f:
-  data = json.load(f)
-  bearer = data["bearer"]
+bearer = .getenv('BEARER')
 
 # request parameters
 count = 200
