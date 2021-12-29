@@ -26,17 +26,17 @@ relevant_year = 2021
 def get_user(username):
     user_fields = "user.fields=profile_image_url"
     headers = {"Authorization": f"Bearer {bearer_token}"}
-    url = f'https://api.twitter.com/2/users/by?{username}&{user_fields}'
+    url = f'https://api.twitter.com/2/users/by/username/{username}&{user_fields}'
     r = requests.get(url, headers=headers)
     if r.status_code != 200:
         raise Exception(f'Request returned an error: {r.status_code} {r.text}')
     return r.json()
 
 
-def get_tweets(username, max_id):
+def get_tweets(params):
     headers = {"Authorization": f"Bearer {bearer_token}"}
-    url = f'https://api.twitter.com/1.1/favorites/list.json?screen_name={username}&count=200&max_id={max_id}'
-    r = requests.get(url, headers=headers)
+    url = 'https://api.twitter.com/1.1/favorites/list.json?'
+    r = requests.get(url, headers=headers, params=params)
     if r.status_code != 200:
         raise Exception(f'Request returned an error: {r.status_code} {r.text}')
     return r.json()
@@ -90,16 +90,20 @@ def calc_and_print_stats(df, screen_name):
 
 
 def get_like_stats(screen_name):
+    user = get_user(screen_name)
+
     # setup
+    parameters = {'count': 200}
+    parameters.pop("max_id", None)
+    parameters['screen_name'] = screen_name
     liked_tweets = list()
     iteration_count = 0
-    max_id = None
 
     # loop while still in relevant year
     while True:
 
         # get tweets
-        tweet_dict_raw = get_tweets(screen_name, max_id)
+        tweet_dict_raw = get_tweets(parameters)
 
         # check for errors
         if 'errors' in tweet_dict_raw:
@@ -120,7 +124,7 @@ def get_like_stats(screen_name):
         liked_tweets.extend(batch_of_liked_tweets)
 
         # update parameters
-        max_id = batch_of_liked_tweets[-1]['id'] - 1
+        parameters['max_id'] = batch_of_liked_tweets[-1]['id'] - 1
         iteration_count += 1
 
         # check if still in relevant year
