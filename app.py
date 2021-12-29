@@ -64,10 +64,9 @@ def tweets_to_df(liked_tweets):
 
 
 def calc_and_print_stats(df, screen_name):
-    ''' function to calculate and print stats '''
+    ''' function to calculate stats '''
     # number of likes
     num_of_tweets = len(df)
-    # date_of_first_tweet = df['created_at'].iloc[-1].strftime("%d %B %Y")
 
     # number of liked accounts
     num_of_different_accounts = len(df['user'].unique())
