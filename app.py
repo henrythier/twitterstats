@@ -26,7 +26,7 @@ relevant_year = 2021
 def get_user(username):
     user_fields = "user.fields=profile_image_url"
     headers = {"Authorization": f"Bearer {bearer_token}"}
-    url = f'https://api.twitter.com/2/users/by/username/{username}&{user_fields}'
+    url = f'https://api.twitter.com/2/users/by/?usernames={username}&{user_fields}'
     r = requests.get(url, headers=headers)
     if r.status_code != 200:
         raise Exception(f'Request returned an error: {r.status_code} {r.text}')
