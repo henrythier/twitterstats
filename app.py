@@ -4,11 +4,11 @@ from flask_restful import Resource, Api, reqparse
 import pandas as pd
 import requests
 from dateutil import parser
+import os
 
 app = Flask(__name__, static_url_path='',
             static_folder='static',
             template_folder='template')
-app.config["DEBUG"] = True
 api = Api(app)
 
 # To set your enviornment variables in your terminal run the following line:
@@ -17,6 +17,7 @@ bearer_token = os.getenv("TWITTER_BEARER")
 '''
 Start: Twitter functions
 '''
+
 
 # year
 relevant_year = 2021
