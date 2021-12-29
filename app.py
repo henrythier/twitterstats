@@ -16,7 +16,7 @@ api = Api(app)
 Start: Twitter functions
 '''
 # authentication
-bearer = .getenv('BEARER')
+bearer = os.getenv('BEARER')
 
 # request parameters
 count = 200
